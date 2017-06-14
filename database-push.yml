@@ -1,0 +1,31 @@
+---
+- name: Push Database from development to "{{ env }}"
+  hosts: web:&{{ env }}
+  remote_user: "{{ web_user }}"
+
+  vars:
+    project_root: "{{ www_root }}/{{ site }}"
+    project_web_dir: "{{ project_root }}/current"
+
+  tasks:
+  - name: create db backup on development with wp-cli
+    delegate_to: bom-blog.dev
+    remote_user: vagrant
+    command: wp db export db.sql
+    args:
+      chdir: "{{ project_web_dir }}"
+
+  - name: copy db.sql to "{{env}}"
+    copy:
+      src: ../site/db.sql
+      dest: /tmp/db.sql
+
+  - name: import db backup on "{{ env }}"
+    command: wp db import /tmp/db.sql --allow-root
+    args:
+      chdir: "{{project_web_dir}}"
+
+  - name: search and replace on "{{ env }}"
+    command: wp search-replace bom-blog.dev bom-blog.de
+    args:
+      chdir: "{{project_web_dir}}"

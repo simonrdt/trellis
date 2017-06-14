@@ -14,8 +14,6 @@ if File.exist?("#{ANSIBLE_PATH}/vagrant.local.yml")
   vconfig.merge!(local_config) if local_config
 end
 
-ensure_plugins(vconfig.fetch('vagrant_plugins')) if vconfig.fetch('vagrant_install_plugins')
-
 wordpress_sites = load_wordpress_sites
 site_hosts = hosts(wordpress_sites)
 
@@ -24,6 +22,7 @@ Vagrant.require_version '>= 1.8.5'
 Vagrant.configure('2') do |config|
   config.vm.box = vconfig.fetch('vagrant_box')
   config.vm.box_version = vconfig.fetch('vagrant_box_version')
+  config.vm.synced_folder ".", "/vagrant", disabled: true  
   config.ssh.forward_agent = true
   config.vm.post_up_message = post_up_message
 
@@ -117,17 +116,6 @@ Vagrant.configure('2') do |config|
       extra_vars = Hash[vars.split(',').map { |pair| pair.split('=') }]
       ansible.extra_vars.merge(extra_vars)
     end
-  end
-
-  # Virtualbox settings
-  config.vm.provider 'virtualbox' do |vb|
-    vb.name = config.vm.hostname
-    vb.customize ['modifyvm', :id, '--cpus', vconfig.fetch('vagrant_cpus')]
-    vb.customize ['modifyvm', :id, '--memory', vconfig.fetch('vagrant_memory')]
-
-    # Fix for slow external network connections
-    vb.customize ['modifyvm', :id, '--natdnshostresolver1', 'on']
-    vb.customize ['modifyvm', :id, '--natdnsproxy1', 'on']
   end
 
   # VMware Workstation/Fusion settings
