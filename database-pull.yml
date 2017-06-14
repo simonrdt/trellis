@@ -30,6 +30,6 @@
 
   - name: search and replace on development
     delegate_to: vagrant
-    command: wp search-replace bom-blog.de bom-blog.dev
+    command: wp search-replace {{ url_from }} {{ url_to }}
     args:
       chdir: "{{project_web_dir}}"

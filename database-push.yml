@@ -26,6 +26,6 @@
       chdir: "{{project_web_dir}}"
 
   - name: search and replace on "{{ env }}"
-    command: wp search-replace bom-blog.dev bom-blog.de
+    command: wp search-replace {{ url_from }} {{ url_to }}
     args:
       chdir: "{{project_web_dir}}"
